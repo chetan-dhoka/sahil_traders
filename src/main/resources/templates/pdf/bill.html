@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style th:inline="text">
+        @page { size: A4 portrait; margin: 10mm 10mm 7mm 10mm; }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10pt;
+            line-height: 1.35;
+            color: #252525;
+            background: #ffffff;
+        }
+
+        .invoice {
+            width: 100%;
+            border: 1px solid [(${theme.pdfLine})];
+            border-top: 4px solid [(${theme.pdfPrimary})];
+        }
+
+        .top-strip {
+            width: 100%;
+            border-collapse: collapse;
+            background: [(${theme.pdfTint})];
+            color: [(${theme.pdfPrimary})];
+            font-size: 8pt;
+        }
+        .top-strip td { padding: 6px 9px; vertical-align: middle; }
+        .top-left { text-align: left; width: 33%; }
+        .top-mid { text-align: center; width: 34%; font-weight: bold; letter-spacing: .4px; }
+        .top-right { text-align: right; width: 33%; white-space: nowrap; }
+
+        .brand-header {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .brand-header td { padding: 14px 12px; vertical-align: middle; }
+        .brand-mark-cell { width: 66px; padding-right: 0 !important; }
+        .brand-logo { width: 54px; height: 54px; display: block; }
+        .brand-mark {
+            width: 52px;
+            height: 52px;
+            border-radius: 26px;
+            background: [(${theme.pdfPrimary})];
+            color: #ffffff;
+            text-align: center;
+            font-size: 15pt;
+            font-weight: bold;
+            line-height: 52px;
+        }
+        .firm-name {
+            color: [(${theme.pdfPrimary})];
+            font-size: 23pt;
+            line-height: 1.08;
+            font-weight: bold;
+            letter-spacing: -.3px;
+        }
+        .firm-sub {
+            color: #4d403b;
+            font-size: 10pt;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+        .firm-addr { color: #66605c; font-size: 8.5pt; margin-top: 2px; }
+        .header-tag {
+            text-align: right;
+            color: [(${theme.pdfPrimary})];
+            font-size: 9pt;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .header-tag .tag-small {
+            display: block;
+            color: #77706b;
+            font-size: 8pt;
+            font-weight: normal;
+            margin-top: 4px;
+        }
+
+        .bill-meta {
+            width: 100%;
+            border-collapse: collapse;
+            background: [(${theme.pdfPaper})];
+            border-bottom: 1px solid [(${theme.pdfLine2})];
+        }
+        .bill-meta td { padding: 10px 12px; vertical-align: middle; }
+        .meta-label {
+            display: inline;
+            white-space: nowrap;
+            color: #756660;
+            font-size: 8pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-right: 8px;
+        }
+        .bill-no { color: [(${theme.pdfPrimary})]; font-size: 10pt; font-weight: bold; white-space: nowrap; }
+        .date-block { text-align: right; }
+        .date-value { font-size: 10pt; font-weight: bold; color: #252525; }
+
+        .customer-row {
+            width: 100%;
+            border-collapse: collapse;
+            border-bottom: 1px solid [(${theme.pdfLine2})];
+        }
+        .customer-row td { padding: 10px 12px; }
+        .customer-label {
+            width: 85px;
+            color: #756660;
+            font-size: 8pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            vertical-align: middle;
+        }
+        .customer-name {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #252525;
+            vertical-align: middle;
+            overflow-wrap: anywhere;
+        }
+
+        .items {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 9pt;
+        }
+        .items col.date-col { width: 16%; }
+        .items col.part-col { width: 29%; }
+        .items col.type-col { width: 15%; }
+        .items col.qty-col { width: 10%; }
+        .items col.rate-col { width: 12%; }
+        .items col.amount-col { width: 18%; }
+
+        .items thead { display: table-header-group; }
+        .items thead th {
+            padding: 9px 7px;
+            background: [(${theme.pdfPrimary})];
+            color: #ffffff;
+            border-right: 1px solid [(${theme.pdfHeadLine})];
+            text-align: center;
+            font-size: 8.5pt;
+            font-weight: bold;
+            letter-spacing: .2px;
+        }
+        .items thead th:last-child { border-right: none; }
+        .items tbody td {
+            padding: 6px 7px;
+            border-bottom: 1px solid [(${theme.pdfRowLine})];
+            color: #292929;
+            height: 29px;
+            vertical-align: middle;
+            overflow-wrap: anywhere;
+        }
+        .items tbody tr:nth-child(even) td { background: [(${theme.pdfStripe})]; }
+        .items tbody tr.data-row td { border-right: 1px solid [(${theme.pdfLine3})]; }
+        .items tbody tr.data-row td:last-child { border-right: none; }
+        .c-date { text-align: center; white-space: nowrap; }
+        .c-part { text-align: left; }
+        .c-type { text-align: center; }
+        .c-qty, .c-rate, .c-amt { text-align: right; font-variant-numeric: tabular-nums; }
+        .items tbody tr.filler-row td {
+            border-bottom: 1px solid [(${theme.pdfLine3})];
+        }
+        .items tbody tr.total-row td {
+            padding: 11px 8px;
+            background: [(${theme.pdfTint})];
+            border-top: 2px solid [(${theme.pdfPrimary})];
+            border-bottom: none;
+            color: [(${theme.pdfPrimary})];
+            font-size: 10pt;
+            font-weight: bold;
+        }
+        .items tbody tr.page-total-row td {
+            padding: 8px 8px;
+            background: [(${theme.pdfTint})];
+            border-top: 1px solid [(${theme.pdfLine})];
+            border-bottom: none;
+            color: [(${theme.pdfPrimary})];
+            font-size: 9.5pt;
+            font-weight: bold;
+        }
+        .total-label { text-align: right; padding-right: 14px !important; }
+        .total-amount { text-align: right; white-space: nowrap; }
+
+        .footer {
+            width: 100%;
+            border-collapse: collapse;
+            border-top: 1px solid [(${theme.pdfLine})];
+            background: [(${theme.pdfPaper})];
+        }
+        .footer td { padding: 11px 12px; vertical-align: bottom; }
+        .footer-left { width: 42%; }
+        .footer-center { width: 30%; text-align: center; }
+        .footer-right { width: 28%; text-align: right; }
+        .pan-no { color: #4d403b; font-size: 8.5pt; font-weight: bold; }
+        .footer-note { color: #77706b; font-size: 8pt; margin-top: 5px; }
+        .footer-center { color: #77706b; font-size: 8pt; }
+        .authorized { color: [(${theme.pdfPrimary})]; font-size: 9.5pt; font-weight: bold; }
+        .sign-line { margin-top: 26px; border-top: 1px solid #c9b6ab; padding-top: 5px; color: #77706b; font-size: 7.5pt; }
+
+        tr { page-break-inside: avoid; }
+
+        /* one .invoice block per printed page; last page must not add a blank page */
+        .page { page-break-after: always; }
+        .page.last { page-break-after: auto; }
+        .page-no {
+            text-align: right;
+            padding: 4px 12px 6px 12px;
+            background: [(${theme.pdfPaper})];
+            color: [(${theme.pdfPrimary})];
+            font-size: 8.5pt;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="invoice page" th:each="page : ${pages}" th:classappend="${page.lastPage} ? 'last'">
+
+    <table class="top-strip">
+        <tr>
+            <td class="top-left">Subject to Jurisdiction</td>
+            <td class="top-mid">|| Mahaviraya Namha ||</td>
+            <td class="top-right">Mob.: <span th:text="${firm.mobile}">9550081765</span></td>
+        </tr>
+    </table>
+
+    <table class="brand-header">
+        <tr>
+            <td class="brand-mark-cell">
+                <img th:if="${logoDataUri != null}" th:src="${logoDataUri}" class="brand-logo" alt=""/>
+                <div th:if="${logoDataUri == null}" class="brand-mark" th:text="${firm.logoText}">ST</div>
+            </td>
+            <td>
+                <div class="firm-name" th:text="${firm.firmName}">Sahil Traders</div>
+                <div class="firm-sub" th:text="${firm.subtitle}">Grain &amp; Grocery Broker</div>
+                <div class="firm-addr" th:text="${firm.address}">Anand Heights, Kondhwa, Pune 48.</div>
+            </td>
+            <td class="header-tag">
+                BILL / STATEMENT
+                <span class="tag-small">Grain &amp; Grocery Brokerage</span>
+            </td>
+        </tr>
+    </table>
+
+    <table class="bill-meta">
+        <tr>
+            <td>
+                <span class="meta-label">Bill No.</span>
+                <span class="bill-no" th:text="${bill.billNo}">185</span>
+            </td>
+            <td class="date-block">
+                <span class="meta-label">Date</span>
+                <span class="date-value" th:text="${#temporals.format(bill.billDate,'dd-MM-yyyy')}">19-10-2026</span>
+            </td>
+        </tr>
+    </table>
+
+    <table class="customer-row">
+        <tr>
+            <td class="customer-label">Bill To</td>
+            <td class="customer-name" th:text="${bill.seller.name}">Bansilal Nemichand Ostwal</td>
+        </tr>
+    </table>
+
+    <table class="items">
+        <colgroup>
+            <col class="date-col"/>
+            <col class="part-col"/>
+            <col class="type-col"/>
+            <col class="qty-col"/>
+            <col class="rate-col"/>
+            <col class="amount-col"/>
+        </colgroup>
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Particulars</th>
+            <th>Type</th>
+            <th>Qty.</th>
+            <th>Rate</th>
+            <th>Amount</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="data-row" th:each="item : ${page.items}">
+            <td class="c-date" th:text="${#temporals.format(item.itemDate,'dd-MM-yyyy')}"></td>
+            <td class="c-part" th:text="${item.buyer.name}"></td>
+            <td class="c-type" th:text="${item.materialType}"></td>
+            <td class="c-qty" th:text="${item.qty}"></td>
+            <td class="c-rate" th:text="${#numbers.formatDecimal(item.rate,1,2)}"></td>
+            <td class="c-amt" th:text="${#numbers.formatDecimal(item.amount,1,2)}"></td>
+        </tr>
+
+        <tr class="filler-row" th:each="f : ${page.fillerRows}">
+            <td></td><td></td><td></td><td></td><td></td><td></td>
+        </tr>
+
+        <!-- PAGE TOTAL: shown on every page of a multi-page bill -->
+        <tr class="page-total-row" th:if="${page.totalPages > 1}">
+            <td colspan="5" class="total-label">PAGE TOTAL</td>
+            <td class="total-amount" th:text="${#numbers.formatDecimal(page.pageTotal,1,2)}">1500.00</td>
+        </tr>
+
+        <!-- BILL TOTAL: shown on the last page only -->
+        <tr class="total-row" th:if="${page.lastPage}">
+            <td colspan="5" class="total-label"
+                th:text="${page.totalPages > 1} ? 'TOTAL BILL AMOUNT' : 'TOTAL'">TOTAL</td>
+            <td class="total-amount" th:text="${#numbers.formatDecimal(bill.totalAmount,1,2)}">3820.00</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <table class="footer">
+        <tr>
+            <td class="footer-left">
+                <div class="pan-no" th:if="${firm.panNumber != null and !firm.panNumber.isEmpty()}">
+                    PAN No.: <span th:text="${firm.panNumber}">COHPC2282R</span>
+                </div>
+                <div class="footer-note" th:text="${firm.footerLine2}">123456789</div>
+            </td>
+            <td class="footer-center">
+                <span th:text="${firm.footerLine1}">व्यापारी संबंधात आम्ही फक्त साक्षीदार राहू.</span>
+            </td>
+            <td class="footer-right">
+                <div class="authorized">For <span th:text="${firm.firmName}">Sahil Traders</span></div>
+                <div class="sign-line">Authorized Signature</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- PAGE NUMBER: multi-page bills only -->
+    <div class="page-no" th:if="${page.totalPages > 1}"
+         th:text="'Page ' + ${page.pageNo} + ' / ' + ${page.totalPages}">Page 1 / 1</div>
+
+</div>
+</body>
+</html>

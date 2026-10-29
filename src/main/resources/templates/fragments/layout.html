@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- ── HEAD ──────────────────────────────────────────────── -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${title} + ' | ' + (${currentFirm} != null ? ${currentFirm.firmName} : 'Billing')">Billing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Baloo+2:wght@400;600;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <style th:inline="text">
+        :root {
+            --red:    [(${theme.primary})];
+            --red2:   [(${theme.hover})];
+            --cream:  [(${theme.cream})];
+            --border: [(${theme.border})];
+            --tint:   [(${theme.tint})];
+            --tint2:  [(${theme.tint2})];
+            --tint3:  [(${theme.tint3})];
+            --line:   [(${theme.line})];
+            --line2:  [(${theme.line2})];
+            --label:  [(${theme.labelColor})];
+            --rgb:    [(${theme.rgb})];
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            min-height: 100vh;
+        }
+        /* ── Navbar ── */
+        .navbar {
+            background: var(--red) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,.2);
+        }
+        .navbar-brand {
+            font-family: 'Baloo 2', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #fff !important;
+            letter-spacing: .02em;
+        }
+        .navbar-brand span { font-size: .75rem; opacity: .8; display: block; font-weight: 400; margin-top: -4px; }
+        .nav-link { color: rgba(255,255,255,.88) !important; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { color: #fff !important; }
+        .nav-link i { margin-right: 4px; }
+
+        /* ── Cards ── */
+        .card {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(var(--rgb),.06);
+        }
+        .card-header {
+            background: var(--red);
+            color: #fff;
+            font-weight: 600;
+            font-size: .95rem;
+            border-radius: 8px 8px 0 0 !important;
+            padding: .6rem 1rem;
+        }
+
+        /* ── Buttons ── */
+        .btn-primary   { background: var(--red);  border-color: var(--red);  }
+        .btn-primary:hover  { background: var(--red2); border-color: var(--red2); }
+        .btn-outline-primary { color: var(--red); border-color: var(--red); }
+        .btn-outline-primary:hover { background: var(--red); color: #fff; }
+        .btn-danger    { background: var(--red2); border-color: var(--red2); }
+
+        /* ── Tables ── */
+        .table thead th {
+            background: var(--tint);
+            color: var(--red);
+            font-weight: 600;
+            border-color: var(--border);
+        }
+        .table td, .table th { border-color: var(--line); }
+        .table-hover tbody tr:hover { background: var(--tint2); }
+
+        /* ── Forms ── */
+        .form-control:focus, .form-select:focus {
+            border-color: var(--red);
+            box-shadow: 0 0 0 .18rem rgba(var(--rgb),.15);
+        }
+        label.form-label { font-weight: 600; font-size: .88rem; color: var(--label); }
+
+        /* ── Autocomplete ── */
+        .ac-list {
+            position: absolute; z-index: 999; width: 100%;
+            background: #fff; border: 1.5px solid var(--border);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 6px 18px rgba(var(--rgb),.12);
+            max-height: 200px; overflow-y: auto;
+        }
+        .ac-list li {
+            padding: .35rem .8rem; cursor: pointer;
+            font-size: .88rem; list-style: none; border-bottom: 1px solid var(--line2);
+        }
+        .ac-list li:last-child { border-bottom: none; }
+        .ac-list li:hover { background: var(--tint); color: var(--red); font-weight: 600; }
+
+        /* ── Alerts ── */
+        .alert-success { background: #f0faf0; border-color: #a3d9a5; color: #2d6a2d; }
+        .alert-danger  { background: #fff5f5; border-color: #f5a0a0; color: var(--red); }
+
+        /* ── Links ── */
+        a { color: var(--red); }
+        a:hover { color: var(--red2); }
+    </style>
+</head>
+
+<!-- ── NAVBAR ─────────────────────────────────────────────── -->
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark mb-4">
+    <div class="container-fluid px-3">
+        <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
+            <img th:if="${currentFirm != null and currentFirm.logoPath != null and !currentFirm.logoPath.isEmpty()}"
+                 th:src="@{${'/' + currentFirm.logoPath}}" alt=""
+                 style="width:38px;height:38px;border-radius:50%;background:#fff;"/>
+            <span th:if="${currentFirm == null or currentFirm.logoPath == null or currentFirm.logoPath.isEmpty()}"
+                  style="font-size:1.3rem;opacity:1;margin:0;display:inline;">🏪</span>
+            <span style="display:block;opacity:1;margin:0;font-size:inherit;font-weight:inherit;">
+                <span th:text="${currentFirm != null} ? ${currentFirm.firmName} : 'Billing'"
+                      style="display:block;opacity:1;margin:0;font-size:inherit;font-weight:inherit;">Sahil Traders</span>
+                <span th:text="${currentFirm != null} ? ${currentFirm.subtitle} : ''">Grain &amp; Grocery Broker</span>
+            </span>
+        </a>
+        <button class="navbar-toggler border-0" type="button"
+                data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav me-auto gap-1">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}">
+                        <i class="bi bi-house-fill"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/bills/new}">
+                        <i class="bi bi-plus-circle-fill"></i> New Bill
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/bills}">
+                        <i class="bi bi-search"></i> Bills
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/reports}">
+                        <i class="bi bi-bar-chart-fill"></i> Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/settings}">
+                        <i class="bi bi-gear-fill"></i> Settings
+                    </a>
+                </li>
+            </ul>
+            <a class="btn btn-sm btn-light fw-semibold" th:href="@{/select-firm}"
+               title="Go back to the firm selection screen">
+                <i class="bi bi-arrow-left-right"></i> Switch Firm
+            </a>
+        </div>
+    </div>
+</nav>
+</html>

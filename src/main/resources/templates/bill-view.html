@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('View Bill')"></head>
+<body>
+<nav th:replace="fragments/layout :: navbar"></nav>
+
+<div class="container pb-5" style="max-width:900px">
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Bill No. <strong th:text="${bill.billNo}"></strong></span>
+            <div class="d-flex gap-2">
+                <a th:href="@{/bills/{id}/edit(id=${bill.id})}"
+                   class="btn btn-sm btn-light">✏️ Edit</a>
+                <a th:href="@{/bills/{id}/pdf(id=${bill.id})}"
+                   class="btn btn-sm btn-danger" target="_blank">
+                    <i class="bi bi-file-pdf-fill"></i> Download PDF
+                </a>
+                <a th:href="@{/bills}" class="btn btn-sm btn-light">← Back</a>
+            </div>
+        </div>
+        <div class="card-body">
+
+            <!-- Bill meta -->
+            <div class="row mb-3">
+                <div class="col-6">
+                    <p class="mb-1"><span class="text-muted small">Seller (Name)</span></p>
+                    <p class="fw-bold fs-5" th:text="${bill.seller.name}"></p>
+                </div>
+                <div class="col-6 text-end">
+                    <p class="mb-1"><span class="text-muted small">Bill Date</span></p>
+                    <p class="fw-bold fs-5"
+                       th:text="${#temporals.format(bill.billDate, 'dd-MM-yyyy')}"></p>
+                </div>
+            </div>
+
+            <hr style="border-color:var(--line)"/>
+
+            <!-- Items table -->
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Particulars (Buyer)</th>
+                        <th>Type</th>
+                        <th class="text-end">Qty (bags)</th>
+                        <th class="text-end">Rate</th>
+                        <th class="text-end">Amount (₹)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${bill.items}">
+                        <td th:text="${#temporals.format(item.itemDate,'dd-MM-yyyy')}"></td>
+                        <td th:text="${item.buyer.name}"></td>
+                        <td th:text="${item.materialType}"></td>
+                        <td class="text-end" th:text="${item.qty}"></td>
+                        <td class="text-end"
+                            th:text="${#numbers.formatDecimal(item.rate,1,2)}"></td>
+                        <td class="text-end fw-semibold"
+                            th:text="${#numbers.formatDecimal(item.amount,1,2)}"></td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr style="background:var(--tint3)">
+                        <td colspan="5" class="text-end fw-bold" style="color:var(--red)">
+                            Total Brokerage
+                        </td>
+                        <td class="text-end fw-bold fs-5" style="color:var(--red)"
+                            th:text="'₹ ' + ${#numbers.formatDecimal(bill.totalAmount,1,2)}">
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer actions -->
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <small class="text-muted"
+                   th:text="'Created: ' + ${#temporals.format(bill.createdAt,'dd-MM-yyyy HH:mm')}">
+            </small>
+            <form th:action="@{/bills/{id}/delete(id=${bill.id})}" method="post"
+                  onsubmit="return confirm('Delete Bill #' + [[${bill.billNo}]] + '? This cannot be undone.')">
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash3"></i> Delete Bill
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<style th:inline="text">
+@page { size: A4 portrait; margin: 15mm; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #222; }
+
+.header {
+    border-bottom: 3px solid [(${theme.primary})];
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    display: table;
+    width: 100%;
+}
+.hdr-left  { display: table-cell; vertical-align: bottom; }
+.hdr-right { display: table-cell; vertical-align: bottom; text-align: right; font-size: 9pt; color: #555; }
+.firm-name { font-size: 18pt; font-weight: 900; color: [(${theme.primary})]; }
+.firm-sub  { font-size: 9pt;  color: #555; }
+.report-title { font-size: 12pt; font-weight: 700; color: [(${theme.primary})]; margin-top: 4px; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+thead th {
+    background: [(${theme.primary})];
+    color: #fff;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 9.5pt;
+    border: 1px solid [(${theme.primary})];
+}
+tbody td {
+    padding: 5px 8px;
+    border: 1px solid [(${theme.border})];
+    font-size: 9.5pt;
+}
+tbody tr:nth-child(even) td { background: [(${theme.tint2})]; }
+.text-right { text-align: right; }
+.total-row td {
+    background: [(${theme.tint})];
+    font-weight: 700;
+    color: [(${theme.primary})];
+    border-top: 2px solid [(${theme.primary})];
+    font-size: 10pt;
+}
+.footer {
+    margin-top: 16px;
+    font-size: 8pt;
+    color: #aaa;
+    text-align: center;
+    border-top: 1px solid #ddd;
+    padding-top: 6px;
+}
+thead { display: table-header-group; }
+tr    { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="hdr-left">
+        <div class="firm-name" th:text="${firm.firmName}">Sahil Traders</div>
+        <div class="firm-sub"  th:text="${firm.subtitle}"></div>
+        <div class="report-title">Bill Register – <span th:text="${label}"></span></div>
+    </div>
+    <div class="hdr-right">
+        <div th:text="${firm.address}"></div>
+        <div th:text="'Mob.: ' + ${firm.mobile}"></div>
+        <div th:if="${firm.panNumber}" th:text="'PAN: ' + ${firm.panNumber}"></div>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th style="width:10%">Bill No.</th>
+        <th style="width:15%">Date</th>
+        <th>Seller (Name)</th>
+        <th class="text-right" style="width:18%">Brokerage (₹)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${bills.empty}">
+        <td colspan="4" style="text-align:center; color:#888; padding:20px">
+            No bills found for this period.
+        </td>
+    </tr>
+    <tr th:each="bill : ${bills}">
+        <td th:text="${bill.billNo}"></td>
+        <td th:text="${#temporals.format(bill.billDate,'dd-MM-yyyy')}"></td>
+        <td th:text="${bill.seller.name}"></td>
+        <td class="text-right"
+            th:text="${#numbers.formatDecimal(bill.totalAmount,1,2)}"></td>
+    </tr>
+    <tr class="total-row" th:if="${!bills.empty}">
+        <td colspan="3" style="text-align:right; padding-right:12px">
+            Total (<span th:text="${bills.size()}"></span> bills)
+        </td>
+        <td class="text-right"
+            th:text="${#numbers.formatDecimal(grandTotal,1,2)}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="footer">
+    <span th:text="${firm.firmName}"></span> |
+    <span th:text="${label}"></span> |
+    <span th:text="${firm.footerLine1}"></span>
+</div>
+</body>
+</html>

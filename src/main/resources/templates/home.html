@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Home')"></head>
+<body>
+<nav th:replace="fragments/layout :: navbar"></nav>
+
+<div class="container pb-5">
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- Welcome Banner -->
+    <div class="p-4 mb-4 rounded-3"
+         style="background: linear-gradient(135deg,var(--red),var(--red2)); color:#fff;">
+        <h2 class="mb-0" style="font-family:'Baloo 2',sans-serif; font-weight:800;">
+            🙏 Welcome to <span th:text="${firm.firmName}">Sahil Traders</span> Billing
+        </h2>
+        <p class="mb-0 mt-1" style="opacity:.85" th:text="${firm.subtitle}"></p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <a th:href="@{/bills/new}" class="text-decoration-none">
+                <div class="card text-center py-4 h-100" style="transition:.2s"
+                     onmouseover="this.style.transform='translateY(-3px)'"
+                     onmouseout="this.style.transform=''">
+                    <div style="font-size:2rem">📝</div>
+                    <div class="fw-bold mt-2" style="color:var(--red); font-size:.95rem">New Bill</div>
+                    <div class="text-muted small">Create bill for seller</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a th:href="@{/bills}" class="text-decoration-none">
+                <div class="card text-center py-4 h-100" style="transition:.2s"
+                     onmouseover="this.style.transform='translateY(-3px)'"
+                     onmouseout="this.style.transform=''">
+                    <div style="font-size:2rem">🔍</div>
+                    <div class="fw-bold mt-2" style="color:var(--red); font-size:.95rem">Find Bill</div>
+                    <div class="text-muted small">Search past bills</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a th:href="@{/reports}" class="text-decoration-none">
+                <div class="card text-center py-4 h-100" style="transition:.2s"
+                     onmouseover="this.style.transform='translateY(-3px)'"
+                     onmouseout="this.style.transform=''">
+                    <div style="font-size:2rem">📊</div>
+                    <div class="fw-bold mt-2" style="color:var(--red); font-size:.95rem">Reports</div>
+                    <div class="text-muted small">Quarterly / Annual</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a th:href="@{/settings}" class="text-decoration-none">
+                <div class="card text-center py-4 h-100" style="transition:.2s"
+                     onmouseover="this.style.transform='translateY(-3px)'"
+                     onmouseout="this.style.transform=''">
+                    <div style="font-size:2rem">⚙️</div>
+                    <div class="fw-bold mt-2" style="color:var(--red); font-size:.95rem">Settings</div>
+                    <div class="text-muted small">Edit firm details</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Bills -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-clock-history me-1"></i> Recent Bills</span>
+            <a th:href="@{/bills}" class="btn btn-sm btn-light text-danger">View All →</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>Bill No.</th>
+                        <th>Date</th>
+                        <th>Seller (Name)</th>
+                        <th class="text-end">Brokerage (₹)</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${recentBills.empty}">
+                        <td colspan="5" class="text-center text-muted py-4">
+                            No bills yet. <a th:href="@{/bills/new}">Create your first bill →</a>
+                        </td>
+                    </tr>
+                    <tr th:each="bill : ${recentBills}">
+                        <td><strong th:text="${bill.billNo}"></strong></td>
+                        <td th:text="${#temporals.format(bill.billDate,'dd-MM-yyyy')}"></td>
+                        <td th:text="${bill.seller.name}"></td>
+                        <td class="text-end fw-semibold"
+                            th:text="'₹ ' + ${#numbers.formatDecimal(bill.totalAmount,1,2)}"></td>
+                        <td>
+                            <a th:href="@{/bills/{id}(id=${bill.id})}"
+                               class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
