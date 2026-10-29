@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: sahil_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sahil_billing
+      MYSQL_USER: sahil
+      MYSQL_PASSWORD: sahil123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-time-zone=+05:30
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - sahil_net
+
+  app:
+    build: .
+    container_name: sahil_app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sahil_billing?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: sahil
+      SPRING_DATASOURCE_PASSWORD: sahil123
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - sahil_net
+    restart: on-failure
+
+volumes:
+  mysql_data:
+
+networks:
+  sahil_net:
+    driver: bridge
